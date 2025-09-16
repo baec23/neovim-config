@@ -3,6 +3,7 @@
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+vim.cmd("language en_US")
 
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
@@ -38,6 +39,8 @@ vim.wo.number = true
 vim.o.mouse = "a"
 
 -- Tab
+vim.opt.autoindent = true
+vim.opt.smartindent = true
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 vim.o.softtabstop = 4
@@ -90,11 +93,30 @@ vim.keymap.set("v", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzz")
 vim.keymap.set("n", "N", "Nzz")
 
+vim.keymap.set("n", "<leader>h", vim.lsp.buf.hover, { desc = "Show hover information" })
+
+vim.keymap.set("n", "<C-s>", function()
+  vim.lsp.buf.format() -- Format the code
+  vim.cmd("wa")       -- Save the file
+end, { noremap = true, silent = true })
+
+vim.keymap.set("i", "<C-s>", function()
+  vim.lsp.buf.format()
+  vim.cmd("stopinsert") -- Exit insert mode
+  vim.cmd("wa")        -- Save the file
+end, { noremap = true, silent = true })
+
+vim.keymap.set("v", "<C-s>", function()
+  vim.lsp.buf.format()
+  vim.cmd("wa")
+end, { noremap = true, silent = true })
+
 -- Clear highlight
 vim.keymap.set("n", "<Esc>", "<Esc>:noh<CR>", { noremap = true, silent = true })
 
 -- Open config
 vim.keymap.set("n", "<leader>conf", ":e ~/.config/nvim/init.lua<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>source", ":source ~/.config/nvim/init.lua<CR>", { noremap = true, silent = true })
 
 vim.keymap.set("n", "<leader>ya", "ggVGy<C-o>", { desc = "Yank all" })
 vim.keymap.set("n", "<leader>cf", "<cmd>lua vim.lsp.buf.format()<CR>", { desc = "Format code" })
@@ -275,6 +297,12 @@ cmp.setup({
     { name = "nvim_lsp" },
     { name = "luasnip" },
   },
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  callback = function()
+    vim.lsp.buf.format()
+  end,
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
